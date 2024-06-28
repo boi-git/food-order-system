@@ -7,23 +7,30 @@ const MyComponent = () => {
     const [restaurants, setRestaurants] = useState([]);
     const [currentRestaurantIndex, setCurrentRestaurantIndex] = useState(0);
     const [fade, setFade] = useState(false);
+
     useEffect(() => {
-        // Fetch restaurant data
         let isMounted = true;
+
         const getRestaurants = async () => {
             try {
                 const data = await fetchRestaurants();
                 if (isMounted) {
                     setRestaurants(data.restaurants);
                 }
-            } catch (err) {}
+            } catch (err) {
+                console.error("Failed to fetch restaurants", err);
+            }
         };
 
         getRestaurants();
+
+        return () => {
+            isMounted = false;
+        };
     }, []);
 
     useEffect(() => {
-        if (restaurants.length === 0) return; // Only set interval if restaurants are available
+        if (restaurants.length === 0) return;
 
         const intervalId = setInterval(() => {
             setFade(true);
@@ -32,15 +39,15 @@ const MyComponent = () => {
                     (prevIndex) => (prevIndex + 1) % restaurants.length
                 );
                 setFade(false);
-            }, 250); // Half the interval duration for fade-out and fade-in
-        }, 5000); // Change image every 3 seconds
+            }, 250);
+        }, 5000);
 
-        return () => clearInterval(intervalId); // Clean up the interval on component unmount
-    }, [restaurants.length]);
+        return () => clearInterval(intervalId);
+    }, [restaurants]);
 
     return (
         <div className="flex flex-col md:flex-row w-screen h-screen items-center">
-            <div className="w-full md:w-1/2 h-full p-8 flex flex-col items-center justify-center ">
+            <div className="w-full md:w-1/2 h-full p-8 flex flex-col items-center justify-center bg-gray-100 rounded-lg shadow-lg">
                 <h1 className="text-3xl font-bold mb-6">Login</h1>
                 <div className="w-full mb-4">
                     <label
@@ -103,7 +110,7 @@ const MyComponent = () => {
             </div>
             <div
                 className={`w-full md:w-1/2 h-auto aspect-video md:h-screen transition-opacity duration-500 ease-in-out ${
-                    fade ? "opacity-15" : "opacity-100"
+                    fade ? "opacity-0" : "opacity-100"
                 }`}
                 style={{
                     backgroundImage:
@@ -114,7 +121,7 @@ const MyComponent = () => {
                     backgroundPosition: "center",
                 }}
             >
-                <div className=" h-full bg-black bg-opacity-50 text-white p-4 flex flex-col justify-end">
+                <div className="h-full bg-black bg-opacity-50 text-white p-4 flex flex-col justify-end">
                     {restaurants.length > 0 && (
                         <>
                             <h2 className="text-xl font-bold">
